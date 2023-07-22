@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Classification with ResNet50</title>
+    <!-- Add the Bootstrap CSS link -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Upload an Image</h3>
+                    </div>
+                    <!-- Add the CSRF token to the form -->
+                    {% csrf_token %}
+                    <div class="card-body">
+                        <form id="imageUploadForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label class="form-label">Choose an image:</label>
+                                <input type="file" name="image" id="imageInput" class="form-control" accept="image/*" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Classify</button>
+                        </form>
+                        <!-- Add a container to display the predictions -->
+                        <div id="resultContainer" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add the Bootstrap JS and jQuery links -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Update the AJAX URL in index.html -->
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var form = document.getElementById('imageUploadForm');
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                var formData = new FormData(form);
+    
+                // Get the CSRF token from the cookie
+                var csrftoken = getCookie('csrftoken');
+    
+                // Add the CSRF token to the request headers
+                fetch('/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Call the function to display the predictions
+                    displayPredictions(data.predictions);
+                })
+                .catch(error => {
+                    alert('The Image you provided maybe corrupt or it is server side issue.');
+                    console.error(error);
+                });
+            });
+        });
+    
+        // Function to get the CSRF token from the cookie
+        function getCookie(name) {
+            var value = "; " + document.cookie;
+            var parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+        }
+        
+        // Function to display the predictions
+        function displayPredictions(predictions) {
+            var resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = ''; // Clear previous predictions
+            if (predictions.length > 0) {
+                var alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success';
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = '<strong>Top Predictions:</strong><ul>';
+                predictions.forEach(function(prediction) {
+                    alertDiv.innerHTML += '<li>' + prediction[0] + ' (Probability: ' + prediction[1] + ')</li>';
+                });
+                alertDiv.innerHTML += '</ul>';
+                resultContainer.appendChild(alertDiv);
+            } else {
+                var alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger';
+                alertDiv.role = 'alert';
+                alertDiv.innerText = 'No predictions found.';
+                resultContainer.appendChild(alertDiv);
+            }
+        }
+    </script> -->
+</body>
+</html>
