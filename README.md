@@ -24,7 +24,7 @@ To run ML-Django Image Classifier locally, follow these steps:
 2. Navigate to the project directory:
 
    ```shell
-   cd ml-django-image-classifier
+   cd Image-classifier
    ```
 
 3. Create a virtual environment:
