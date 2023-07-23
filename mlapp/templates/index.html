@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,11 +12,11 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">Upload an Image</h3>
+                        <h3 class="mb-0 text-center">Image Classification</h3>
                     </div>
                     <div class="card-body">
                         <!-- Add the CSRF token to the form -->
-                        <form method="post" enctype="multipart/form-data">
+                        <form id="imageUploadForm" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="mb-3">
                                 <label class="form-label">Choose an image:</label>
@@ -27,9 +28,125 @@
                 </div>
             </div>
         </div>
+
+        <!-- Add a container to display the uploaded image preview -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0 text-center">Uploaded Image Preview</h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <!-- Display the uploaded image if available, else show a placeholder image -->
+                        <img id="uploadedImagePreview" class="img-fluid" src="{% static 'init.png' %}" alt="Uploaded Image Preview">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add a container to display the predictions -->
+            <div class="col-md-6">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0 text-center">Classification Result</h3>
+                    </div>
+                    <div class="card-body" id="resultContainer" style="display: none;">
+                        {% if predictions %}
+                            <div class="alert alert-success" role="alert">
+                                <strong>Top Predictions:</strong>
+                                <ul>
+                                    {% for prediction in predictions %}
+                                        <li>{{ prediction.0 }} (Probability: {{ prediction.1 }})</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-danger" role="alert">
+                                No predictions found.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Add the Bootstrap JS link -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Add the jQuery and AJAX script links -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"></script>
+    <!-- Add the custom script -->
+    <script>
+        $(document).ready(function() {
+            // Function to display the uploaded image preview
+            function displayImagePreview(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#uploadedImagePreview').attr('src', e.target.result);
+                        $('#imagePreviewContainer').show();
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+
+            // Listen for changes in the file input to display the image preview
+            $('#imageInput').change(function() {
+                displayImagePreview(this);
+            });
+
+            // Handle the form submission using AJAX
+            $('#imageUploadForm').submit(function(e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+    
+                // Get the CSRF token from the form
+                var csrftoken = '{{ csrf_token }}';
+    
+                // Add the CSRF token to the AJAX request headers
+                $.ajax({
+                    url: '/',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    success: function(data) {
+                        // Display the predictions in the result container
+                        displayPredictions(data.predictions);
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle errors here (optional)
+                        alert('An error occurred while processing the image. Please try again.');
+                        console.error(error);
+                    }
+                });
+            });
+
+            // Function to display the predictions
+            function displayPredictions(predictions) {
+                var resultContainer = $('#resultContainer');
+                resultContainer.empty(); // Clear previous predictions
+
+                if (predictions.length > 0) {
+                    var alertDiv = $('<div class="alert alert-success" role="alert">');
+                    alertDiv.html('<strong>Top Predictions:</strong><ul>');
+                    predictions.forEach(function(prediction) {
+                        alertDiv.append('<li>' + prediction[0] + ' (Probability: ' + prediction[1] + ')</li>');
+                    });
+                    alertDiv.append('</ul>');
+                    resultContainer.append(alertDiv);
+                    resultContainer.show(); // Show the result container
+                } else {
+                    var alertDiv = $('<div class="alert alert-danger" role="alert">');
+                    alertDiv.text('No predictions found.');
+                    resultContainer.append(alertDiv);
+                    resultContainer.show(); // Show the result container
+                }
+            }
+        });
+    </script>
 </body>
 </html>
