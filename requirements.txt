@@ -3,3 +3,4 @@ whitenoise==6.6.0
 tensorflow
 numpy
 Pillow
+psycopg2-binary
